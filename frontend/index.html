@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star war</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Latest compiled JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <nav>
+            <input type="text" id="searchId" placeholder="search by id ex 1">
+            <button id="search">Search</button>
+        </nav>
+        <div id="spinner" class="spinner-border text-info"></div>
+        <div class="sub-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Species</th>
+                        <th>Gender</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    
+                </tbody>
+            </table>
+            <div id="indivudual">
+
+            </div>
+            <div>
+                <button id="prev">Prev</button>
+                <span id="paginationPageNo"></span>
+                <button id="next">Next</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const prevBtn = document.getElementById("prev")
+    const nextBtn = document.getElementById("next")
+    const tbody = document.getElementById("tbody")
+    const page = document.getElementById("paginationPageNo")
+    const spinner = document.getElementById("spinner")
+    const searchBtn = document.getElementById("search") 
+    const searchId = document.getElementById("searchId")
+    const indivudual = document.getElementById(" <td>${val.name}</td>")
+
+    spinner.style.display="none"
+    let pegination = 1
+     page.innerText=pegination
+    if(pegination==1){
+        prevBtn.disabled = true
+    }
+    
+   handleCall(pegination)
+    async function handleCall(i){
+        debugger
+        spinner.style.display = "block"
+        const res = await fetch(`http://localhost:5000/app/${i}`)
+        const data = await res.json()
+        const tags = data.map((val)=>{
+        return`
+        <tr>
+            <td>${val.name}</td>
+            <td><a href=${val.species.length?val.species[0]:"#"} target="_blank">${val.species.length?val.species[0]:"no data"}</a></td>
+            <td>${val.gender}</td>
+        </tr>
+        `
+       })
+        tbody.innerHTML = tags.join("")
+        spinner.style.display = "none"
+        
+        
+    }
+    nextBtn.addEventListener("click",()=>{
+        pegination++
+        if(pegination!==1) prevBtn.disabled =false
+       handleCall(pegination)
+       page.innerText=pegination
+       if(pegination!==9){
+        nextBtn.disabled = false
+       }
+    })
+    prevBtn.addEventListener("click", ()=>{
+        if(pegination==1){
+            prevBtn.disabled = true
+        }
+            --pegination
+       handleCall(pegination) 
+       page.innerText=pegination
+        
+    })
+searchBtn.addEventListener("click", searchById)
+    async function searchById(){
+        if(!searchId) return handleCall(pegination)
+        spinner.style.display = "block"
+        const res = await fetch(`http://localhost:5000/app/search/${searchId.value}`)
+        const data = await res.json()
+    
+        
+        let each=`
+        <tr>
+            <td>${data.name}</td>
+            <td><a href=${data.species.length?data.species[0]:"#"} target="_blank">${data.species.length?data.species[0]:"no data"}</a></td>
+            <td>${data.gender}</td>
+        </tr>
+        `
+       
+        tbody.innerHTML = each
+        spinner.style.display = "none"
+        
+        
+    }
+    
+</script>
+</html>
